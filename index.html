@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accommodation Preference Form</title>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f2ec;
+      --surface: #ffffff;
+      --border: #e2ddd6;
+      --text-primary: #1a1714;
+      --text-secondary: #7a746b;
+      --accent: #2d5a3d;
+      --accent-light: #eef4f0;
+      --accent-border: #a8c9b4;
+      --danger: #c0392b;
+      --warning-bg: #fdf6ec;
+      --warning-border: #f0d9a8;
+      --warning-text: #8a6914;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    /* Subtle background texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(45,90,61,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(45,90,61,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 580px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .form-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .header-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 22px;
+    }
+
+    .form-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.25;
+    }
+
+    .form-header h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 360px;
+      margin: 0 auto;
+    }
+
+    /* Setup banner */
+    .setup-banner {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: var(--radius-sm);
+      padding: 0.875rem 1rem;
+      font-size: 13px;
+      color: var(--warning-text);
+      margin-bottom: 1.5rem;
+      line-height: 1.55;
+    }
+
+    .setup-banner strong { font-weight: 600; }
+
+    .setup-banner ol {
+      margin-top: 0.5rem;
+      padding-left: 1.25rem;
+    }
+
+    .setup-banner ol li { margin-top: 3px; }
+
+    .setup-banner a { color: var(--warning-text); font-weight: 600; }
+
+    /* Cards / sections */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Fields */
+    .field { margin-bottom: 1.1rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .required { color: var(--danger); margin-left: 3px; }
+
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="tel"] {
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.08);
+    }
+
+    .field input::placeholder { color: var(--text-secondary); }
+
+    .helper {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+
+    /* Accommodation cards */
+    .choice-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .choice-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      background: var(--bg);
+    }
+
+    .choice-card:hover {
+      border-color: var(--accent-border);
+      background: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    .choice-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      box-shadow: 0 0 0 3px rgba(45,90,61,0.1);
+    }
+
+    .choice-card input[type="radio"] { display: none; }
+
+    .card-icon {
+      font-size: 24px;
+      margin-bottom: 2px;
+    }
+
+    .choice-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .choice-card.selected .choice-title { color: var(--accent); }
+
+    .choice-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .choice-card.selected .choice-desc { color: var(--accent); opacity: 0.8; }
+
+    /* Check mark on selected */
+    .check-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      margin-left: auto;
+      align-self: flex-end;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: transparent;
+      background: transparent;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .choice-card.selected .check-indicator {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Submit */
+    .submit-btn {
+      display: block;
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 13px;
+      border-radius: var(--radius-sm);
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      margin-top: 1.5rem;
+      letter-spacing: 0.01em;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .form-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    .error-msg {
+      font-size: 13px;
+      color: var(--danger);
+      text-align: center;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    /* Success */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 4rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 2px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 28px;
+    }
+
+    .success-screen h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .success-screen p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 340px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .success-detail {
+      display: inline-block;
+      margin-top: 1.25rem;
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 999px;
+    }
+
+    @media (max-width: 480px) {
+      .choice-grid { grid-template-columns: 1fr; }
+      .form-header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <div class="form-header">
+      <div class="header-icon">⛺</div>
+      <h1>Where would you like to <em>sleep?</em></h1>
+      <p>Fill in your details and pick your preferred accommodation for your stay with us.</p>
+    </div>
+
+    <!-- ⚠️ SETUP BANNER — remove this once EmailJS is configured -->
+    <div class="setup-banner" id="setup-banner">
+      <strong>⚠️ Setup required before going live:</strong>
+      <ol>
+        <li>Sign up free at <a href="https://www.emailjs.com" target="_blank">emailjs.com</a></li>
+        <li>Connect your Gmail → copy your <strong>Service ID</strong></li>
+        <li>Create a template using the variables in the code → copy your <strong>Template ID</strong></li>
+        <li>Go to Account → General → copy your <strong>Public Key</strong></li>
+        <li>Replace the 3 placeholder values in the <code>&lt;script&gt;</code> at the bottom of this file</li>
+      </ol>
+    </div>
+
+    <div id="main-form">
+
+      <!-- YOUR DETAILS -->
+      <div class="section">
+        <div class="section-label">Your details</div>
+
+        <div class="field">
+          <label for="f-name">Full name <span class="required">*</span></label>
+          <input type="text" id="f-name" placeholder="e.g. Jane Kamau" autocomplete="name" />
+        </div>
+
+        <div class="field">
+          <label for="f-email">Email address <span class="required">*</span></label>
+          <input type="email" id="f-email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label for="f-phone">Phone number</label>
+          <input type="tel" id="f-phone" placeholder="+250 7xx xxx xxx" autocomplete="tel" />
+          <p class="helper">Optional — for any urgent booking updates.</p>
+        </div>
+      </div>
+
+      <!-- ACCOMMODATION PREFERENCE -->
+      <div class="section">
+        <div class="section-label">Accommodation preference <span class="required">*</span></div>
+
+        <div class="choice-grid">
+
+          <label class="choice-card" id="card-tent" onclick="selectAccom('Tent', this)">
+            <input type="radio" name="accom" value="Tent" />
+            <div class="card-icon">⛺</div>
+            <div class="choice-title">Tent</div>
+            <div class="choice-desc">Sleep under the stars in our cozy pitched tents with bedding included.</div>
+            <div class="check-indicator">✓</div>
+          </label>
+
+          <label class="choice-card" id="card-room" onclick="selectAccom('Room', this)">
+            <input type="radio" name="accom" value="Room" />
+            <div class="card-icon">🏠</div>
+            <div class="choice-title">Room</div>
+            <div class="choice-desc">Private indoor rooms with en-suite facilities and comfortable furnishings.</div>
+            <div class="check-indicator">✓</div>
+          </label>
+
+          <label class="choice-card" id="card-either" onclick="selectAccom('Either is fine', this)">
+            <input type="radio" name="accom" value="Either is fine" />
+            <div class="card-icon">🔀</div>
+            <div class="choice-title">Either is fine</div>
+            <div class="choice-desc">Happy to be placed wherever is available.</div>
+            <div class="check-indicator">✓</div>
+          </label>
+
+          <label class="choice-card" id="card-undecided" onclick="selectAccom('Not sure yet', this)">
+            <input type="radio" name="accom" value="Not sure yet" />
+            <div class="card-icon">🤔</div>
+            <div class="choice-title">Not sure yet</div>
+            <div class="choice-desc">I'd like more information before deciding.</div>
+            <div class="check-indicator">✓</div>
+          </label>
+
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+        Submit preference →
+      </button>
+      <p class="form-note">🔒 Your response is private and used only to prepare your stay.</p>
+      <p class="error-msg" id="error-msg">Something went wrong. Please try again or contact us directly.</p>
+
+    </div><!-- /#main-form -->
+
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✅</div>
+      <h2>Thank you!</h2>
+      <p>We've received your details and accommodation preference. We'll be in touch shortly to confirm your booking.</p>
+      <span class="success-detail" id="success-detail"></span>
+    </div>
+
+  </div><!-- /.wrap -->
+
+  <script>
+    // ─────────────────────────────────────────────────────────
+    //  STEP 1: Replace these three values with your EmailJS
+    //          credentials from https://www.emailjs.com
+    // ─────────────────────────────────────────────────────────
+    const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // Account → General
+    const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // Email Services
+    const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // Email Templates
+    // ─────────────────────────────────────────────────────────
+    //  STEP 2: In your EmailJS template body, use these vars:
+    //
+    //    Name:          {{from_name}}
+    //    Email:         {{from_email}}
+    //    Phone:         {{phone}}
+    //    Accommodation: {{accommodation}}
+    //    Submitted at:  {{sent_at}}
+    //    Sent to:       leninharden1@gmail.com
+    // ─────────────────────────────────────────────────────────
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    let selectedAccom = '';
+
+    const cardIds = {
+      'Tent': 'card-tent',
+      'Room': 'card-room',
+      'Either is fine': 'card-either',
+      'Not sure yet': 'card-undecided'
+    };
+
+    function selectAccom(val, el) {
+      Object.values(cardIds).forEach(id => {
+        document.getElementById(id).classList.remove('selected');
+      });
+      el.classList.add('selected');
+      selectedAccom = val;
+    }
+
+    async function submitForm() {
+      const name    = document.getElementById('f-name').value.trim();
+      const email   = document.getElementById('f-email').value.trim();
+      const phone   = document.getElementById('f-phone').value.trim();
+      const errEl   = document.getElementById('error-msg');
+      const btn     = document.getElementById('submit-btn');
+
+      errEl.style.display = 'none';
+
+      // Validation
+      if (!name) { alert('Please enter your full name.'); return; }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Please enter a valid email address.'); return;
+      }
+      if (!selectedAccom) {
+        alert('Please select an accommodation preference.'); return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          to_email:      'leninharden1@gmail.com',
+          from_name:     name,
+          from_email:    email,
+          phone:         phone || 'Not provided',
+          accommodation: selectedAccom,
+          sent_at:       new Date().toLocaleString('en-GB', {
+                           dateStyle: 'full', timeStyle: 'short'
+                         })
+        });
+
+        // Show success
+        document.getElementById('main-form').style.display = 'none';
+        document.getElementById('setup-banner').style.display = 'none';
+        const success = document.getElementById('success-screen');
+        success.style.display = 'block';
+        document.getElementById('success-detail').textContent =
+          `${name} · ${selectedAccom}`;
+
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Submit preference →';
+        errEl.style.display = 'block';
+        console.error('EmailJS error:', err);
+      }
+    }
+  </script>
+</body>
+</html>
