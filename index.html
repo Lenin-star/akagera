@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Accommodation Preference Form</title>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,9 +18,6 @@
       --accent-light: #eef4f0;
       --accent-border: #a8c9b4;
       --danger: #c0392b;
-      --warning-bg: #fdf6ec;
-      --warning-border: #f0d9a8;
-      --warning-text: #8a6914;
       --radius: 14px;
       --radius-sm: 8px;
     }
@@ -37,7 +33,6 @@
       padding: 3rem 1rem 4rem;
     }
 
-    /* Subtle background texture */
     body::before {
       content: '';
       position: fixed;
@@ -95,29 +90,6 @@
       max-width: 360px;
       margin: 0 auto;
     }
-
-    /* Setup banner */
-    .setup-banner {
-      background: var(--warning-bg);
-      border: 1px solid var(--warning-border);
-      border-radius: var(--radius-sm);
-      padding: 0.875rem 1rem;
-      font-size: 13px;
-      color: var(--warning-text);
-      margin-bottom: 1.5rem;
-      line-height: 1.55;
-    }
-
-    .setup-banner strong { font-weight: 600; }
-
-    .setup-banner ol {
-      margin-top: 0.5rem;
-      padding-left: 1.25rem;
-    }
-
-    .setup-banner ol li { margin-top: 3px; }
-
-    .setup-banner a { color: var(--warning-text); font-weight: 600; }
 
     /* Cards / sections */
     .section {
@@ -214,10 +186,7 @@
 
     .choice-card input[type="radio"] { display: none; }
 
-    .card-icon {
-      font-size: 24px;
-      margin-bottom: 2px;
-    }
+    .card-icon { font-size: 24px; margin-bottom: 2px; }
 
     .choice-title {
       font-size: 14px;
@@ -235,7 +204,6 @@
 
     .choice-card.selected .choice-desc { color: var(--accent); opacity: 0.8; }
 
-    /* Check mark on selected */
     .check-indicator {
       width: 18px;
       height: 18px;
@@ -257,6 +225,59 @@
       background: var(--accent);
       border-color: var(--accent);
       color: #fff;
+    }
+
+    /* Price panel */
+    .price-panel {
+      margin-top: 1.25rem;
+      border-radius: var(--radius-sm);
+      background: var(--accent-light);
+      border: 1px solid var(--accent-border);
+      padding: 1.1rem 1.25rem;
+      display: none;
+      animation: fadeSlide 0.2s ease;
+    }
+
+    .price-panel.visible { display: block; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .price-panel-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .price-label {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .price-amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .price-per {
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0.75;
+      margin-left: 4px;
+    }
+
+    .price-includes {
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0.8;
+      margin-top: 0.4rem;
     }
 
     /* Submit */
@@ -366,19 +387,15 @@
       <p>Fill in your details and pick your preferred accommodation for your stay with us.</p>
     </div>
 
-    <!-- ⚠️ SETUP BANNER — remove this once EmailJS is configured -->
-    <div class="setup-banner" id="setup-banner">
-      <strong>⚠️ Setup required before going live:</strong>
-      <ol>
-        <li>Sign up free at <a href="https://www.emailjs.com" target="_blank">emailjs.com</a></li>
-        <li>Connect your Gmail → copy your <strong>Service ID</strong></li>
-        <li>Create a template using the variables in the code → copy your <strong>Template ID</strong></li>
-        <li>Go to Account → General → copy your <strong>Public Key</strong></li>
-        <li>Replace the 3 placeholder values in the <code>&lt;script&gt;</code> at the bottom of this file</li>
-      </ol>
-    </div>
-
-    <div id="main-form">
+    <form
+      id="main-form"
+      name="accommodation-preference"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+    >
+      <input type="hidden" name="form-name" value="accommodation-preference" />
+      <p style="display:none"><label>Don't fill this out: <input name="bot-field" /></label></p>
 
       <!-- YOUR DETAILS -->
       <div class="section">
@@ -386,17 +403,17 @@
 
         <div class="field">
           <label for="f-name">Full name <span class="required">*</span></label>
-          <input type="text" id="f-name" placeholder="e.g. Jane Kamau" autocomplete="name" />
+          <input type="text" id="f-name" name="name" placeholder="e.g. Jane Kamau" autocomplete="name" required />
         </div>
 
         <div class="field">
           <label for="f-email">Email address <span class="required">*</span></label>
-          <input type="email" id="f-email" placeholder="you@example.com" autocomplete="email" />
+          <input type="email" id="f-email" name="email" placeholder="you@example.com" autocomplete="email" required />
         </div>
 
         <div class="field">
           <label for="f-phone">Phone number</label>
-          <input type="tel" id="f-phone" placeholder="+250 7xx xxx xxx" autocomplete="tel" />
+          <input type="tel" id="f-phone" name="phone" placeholder="+250 7xx xxx xxx" autocomplete="tel" />
           <p class="helper">Optional — for any urgent booking updates.</p>
         </div>
       </div>
@@ -408,23 +425,23 @@
         <div class="choice-grid">
 
           <label class="choice-card" id="card-tent" onclick="selectAccom('Tent', this)">
-            <input type="radio" name="accom" value="Tent" />
+            <input type="radio" name="accommodation" value="Tent" />
             <div class="card-icon">⛺</div>
             <div class="choice-title">Tent</div>
-            <div class="choice-desc">Sleep under the stars in our cozy pitched tents with bedding included.</div>
+            <div class="choice-desc">Sleep under the stars in our cozy pitched tents. Comes with a mattress and two sleeping bags.</div>
             <div class="check-indicator">✓</div>
           </label>
 
           <label class="choice-card" id="card-room" onclick="selectAccom('Room', this)">
-            <input type="radio" name="accom" value="Room" />
+            <input type="radio" name="accommodation" value="Room" />
             <div class="card-icon">🏠</div>
             <div class="choice-title">Room</div>
-            <div class="choice-desc">Private indoor rooms with en-suite facilities and comfortable furnishings.</div>
+            <div class="choice-desc">Comfortable indoor rooms, shared with other guests.</div>
             <div class="check-indicator">✓</div>
           </label>
 
           <label class="choice-card" id="card-either" onclick="selectAccom('Either is fine', this)">
-            <input type="radio" name="accom" value="Either is fine" />
+            <input type="radio" name="accommodation" value="Either is fine" />
             <div class="card-icon">🔀</div>
             <div class="choice-title">Either is fine</div>
             <div class="choice-desc">Happy to be placed wherever is available.</div>
@@ -432,7 +449,7 @@
           </label>
 
           <label class="choice-card" id="card-undecided" onclick="selectAccom('Not sure yet', this)">
-            <input type="radio" name="accom" value="Not sure yet" />
+            <input type="radio" name="accommodation" value="Not sure yet" />
             <div class="card-icon">🤔</div>
             <div class="choice-title">Not sure yet</div>
             <div class="choice-desc">I'd like more information before deciding.</div>
@@ -440,111 +457,124 @@
           </label>
 
         </div>
+
+        <!-- Price panel — shown when tent or room is selected -->
+        <div class="price-panel" id="price-panel">
+          <div class="price-panel-row">
+            <span class="price-label" id="price-label">Tent pricing</span>
+            <span>
+              <span class="price-amount" id="price-amount">RWF 45,000</span>
+              <span class="price-per" id="price-per">/ night per person</span>
+            </span>
+          </div>
+          <p class="price-includes" id="price-includes">Includes bedding, mosquito net &amp; breakfast</p>
+        </div>
+
       </div>
 
-      <button class="submit-btn" id="submit-btn" onclick="submitForm()">
-        Submit preference →
-      </button>
+      <button type="submit" class="submit-btn" id="submit-btn">Submit preference →</button>
       <p class="form-note">🔒 Your response is private and used only to prepare your stay.</p>
       <p class="error-msg" id="error-msg">Something went wrong. Please try again or contact us directly.</p>
 
-    </div><!-- /#main-form -->
+    </form>
 
     <div class="success-screen" id="success-screen">
       <div class="success-icon">✅</div>
       <h2>Thank you!</h2>
-      <p>We've received your details and accommodation preference. We'll be in touch shortly to confirm your booking.</p>
+      <p>We've received your details and accommodation preference. We'll be in touch shortly with your booking confirmation.</p>
       <span class="success-detail" id="success-detail"></span>
     </div>
 
   </div><!-- /.wrap -->
 
   <script>
+    // ─── Pricing configuration ────────────────────────────────
+    // Update these values to set your prices.
+    const PRICING = {
+      Tent: {
+        label:    'Tent pricing',
+        amount:   'RWF 30,000',
+        per:      '/ night',
+        includes: 'Includes mattress & two sleeping bags',
+      },
+      Room: {
+        label:    'Room pricing',
+        amount:   'RWF 45,000',
+        per:      '/ night',
+        includes: 'Shared room',
+      },
+    };
     // ─────────────────────────────────────────────────────────
-    //  STEP 1: Replace these three values with your EmailJS
-    //          credentials from https://www.emailjs.com
-    // ─────────────────────────────────────────────────────────
-    const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // Account → General
-    const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // Email Services
-    const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // Email Templates
-    // ─────────────────────────────────────────────────────────
-    //  STEP 2: In your EmailJS template body, use these vars:
-    //
-    //    Name:          {{from_name}}
-    //    Email:         {{from_email}}
-    //    Phone:         {{phone}}
-    //    Accommodation: {{accommodation}}
-    //    Submitted at:  {{sent_at}}
-    //    Sent to:       leninharden1@gmail.com
-    // ─────────────────────────────────────────────────────────
-
-    emailjs.init(EMAILJS_PUBLIC_KEY);
 
     let selectedAccom = '';
 
     const cardIds = {
-      'Tent': 'card-tent',
-      'Room': 'card-room',
-      'Either is fine': 'card-either',
-      'Not sure yet': 'card-undecided'
+      'Tent':          'card-tent',
+      'Room':          'card-room',
+      'Either is fine':'card-either',
+      'Not sure yet':  'card-undecided',
     };
 
     function selectAccom(val, el) {
-      Object.values(cardIds).forEach(id => {
-        document.getElementById(id).classList.remove('selected');
-      });
+      Object.values(cardIds).forEach(id =>
+        document.getElementById(id).classList.remove('selected')
+      );
       el.classList.add('selected');
       selectedAccom = val;
+
+      const panel = document.getElementById('price-panel');
+      const pricing = PRICING[val];
+
+      if (pricing) {
+        document.getElementById('price-label').textContent   = pricing.label;
+        document.getElementById('price-amount').textContent  = pricing.amount;
+        document.getElementById('price-per').textContent     = pricing.per;
+        document.getElementById('price-includes').textContent = pricing.includes;
+        panel.classList.add('visible');
+      } else {
+        panel.classList.remove('visible');
+      }
     }
 
-    async function submitForm() {
-      const name    = document.getElementById('f-name').value.trim();
-      const email   = document.getElementById('f-email').value.trim();
-      const phone   = document.getElementById('f-phone').value.trim();
-      const errEl   = document.getElementById('error-msg');
-      const btn     = document.getElementById('submit-btn');
+    document.getElementById('main-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const errEl = document.getElementById('error-msg');
+      const btn   = document.getElementById('submit-btn');
 
       errEl.style.display = 'none';
 
-      // Validation
-      if (!name) { alert('Please enter your full name.'); return; }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        alert('Please enter a valid email address.'); return;
-      }
       if (!selectedAccom) {
-        alert('Please select an accommodation preference.'); return;
+        alert('Please select an accommodation preference.');
+        return;
       }
 
-      btn.disabled = true;
+      btn.disabled    = true;
       btn.textContent = 'Sending…';
 
       try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          to_email:      'leninharden1@gmail.com',
-          from_name:     name,
-          from_email:    email,
-          phone:         phone || 'Not provided',
-          accommodation: selectedAccom,
-          sent_at:       new Date().toLocaleString('en-GB', {
-                           dateStyle: 'full', timeStyle: 'short'
-                         })
+        const res = await fetch('/', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body:    new URLSearchParams(new FormData(this)).toString(),
         });
 
-        // Show success
+        if (!res.ok) throw new Error('Network response was not ok');
+
+        const name = document.getElementById('f-name').value.trim();
         document.getElementById('main-form').style.display = 'none';
-        document.getElementById('setup-banner').style.display = 'none';
         const success = document.getElementById('success-screen');
         success.style.display = 'block';
         document.getElementById('success-detail').textContent =
           `${name} · ${selectedAccom}`;
 
       } catch (err) {
-        btn.disabled = false;
+        btn.disabled    = false;
         btn.textContent = 'Submit preference →';
         errEl.style.display = 'block';
-        console.error('EmailJS error:', err);
+        console.error('Submission error:', err);
       }
-    }
+    });
   </script>
 </body>
 </html>
